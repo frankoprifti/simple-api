@@ -31,4 +31,5 @@ test/unit/coverage/
 test/coverage/
 .coverage
 .coverage.*
+coverage/
 
