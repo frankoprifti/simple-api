@@ -42,6 +42,14 @@ Ensure you have the following software installed on your machine:
 
    `yarn install`
 
+4. Generate Prisma Client:
+
+   `npx prisma generate`
+
+5. Run migrations:
+
+   `npx prisma migrate deploy`
+
 ### Running the Application
 
 To start the application in dev mode, run the following command:

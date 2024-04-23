@@ -56,7 +56,7 @@ describe('POST /items', () => {
         expect(response.status).toBe(201);
         expect(response.body).toHaveProperty('id');
         expect(response.body).toHaveProperty('name', 'Test Item');
-        expect(response.body).toHaveProperty('owner', 'testuser');
+        expect(response.body).toHaveProperty('ownerId', 1);
     });
     it('should return 400 if name is missing in POST /items', async () => {
         const response = await request(app)
@@ -90,7 +90,7 @@ describe('PUT /items/:id', () => {
         expect(response.status).toBe(200);
         expect(response.body).toHaveProperty('id', itemId);
         expect(response.body).toHaveProperty('name', 'Updated Item');
-        expect(response.body).toHaveProperty('owner', 'testuser');
+        expect(response.body).toHaveProperty('ownerId', 1);
     });
     it('should return 404 if item does not exist in PUT /items/:id', async () => {
 
@@ -107,7 +107,7 @@ describe('PUT /items/:id', () => {
             .send({});
         expect(response.status).toBe(400);
     });
-    it('should return 401 if user is not authorized to update the item in PUT /items/:id', async () => {
+    it('should return 403 if user is not authorized to update the item in PUT /items/:id', async () => {
         const userOneRegisterResponse = await request(app)
             .post('/register')
             .send({ username: 'userone', password: 'password1' });
@@ -144,7 +144,7 @@ describe('PUT /items/:id', () => {
             .set('Authorization', `Bearer ${userTwoToken}`)
             .send({ name: 'Updated Item' });
 
-        expect(response.status).toBe(401);
+        expect(response.status).toBe(403);
         expect(response.body).toEqual({ error: 'You are not authorized to update this item' });
     });
 
@@ -184,7 +184,7 @@ describe('DELETE /items/:id', () => {
             .set('Authorization', `Bearer ${token}`);
         expect(response.status).toBe(404);
     });
-    it('should return 401 if user is not authorized to delete the item in DELETE /items/:id', async () => {
+    it('should return 403 if user is not authorized to delete the item in DELETE /items/:id', async () => {
         const userOneLoginResponse = await request(app)
             .post('/login')
             .send({ username: 'userone', password: 'password1' });
@@ -208,7 +208,7 @@ describe('DELETE /items/:id', () => {
             .delete(`/items/${itemId}`)
             .set('Authorization', `Bearer ${userTwoToken}`)
 
-        expect(response.status).toBe(401);
+        expect(response.status).toBe(403);
         expect(response.body).toEqual({ error: 'You are not authorized to delete this item' });
     });
 });

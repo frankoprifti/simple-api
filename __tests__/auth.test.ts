@@ -9,7 +9,7 @@ describe('POST /register', () => {
     it('should register a new user', async () => {
         const response = await request(app)
             .post('/register')
-            .send({ username: 'testuser', password: 'testpassword' });
+            .send({ username: 'newuser', password: 'testpassword' });
         expect(response.status).toBe(201);
     });
 
