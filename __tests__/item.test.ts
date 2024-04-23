@@ -58,6 +58,64 @@ describe('POST /items', () => {
         expect(response.body).toHaveProperty('name', 'Test Item');
         expect(response.body).toHaveProperty('ownerId', 1);
     });
+    it('should get item by id', async () => {
+        const response = await request(app)
+            .get('/items/1')
+            .set('Authorization', `Bearer ${token}`);
+
+        expect(response.status).toBe(200);
+        expect(response.body).toHaveProperty('id');
+        expect(response.body).toHaveProperty('name', 'Test Item');
+        expect(response.body).toHaveProperty('ownerId', 1);
+    });
+    it('should get 404 for an id that doesn`t exist', async () => {
+        const response = await request(app)
+            .get('/items/2')
+            .set('Authorization', `Bearer ${token}`);
+
+        expect(response.status).toBe(404);
+    });
+    it('should return 403 if user is not authorized to get the item in GET /items/:id', async () => {
+        const userOneRegisterResponse = await request(app)
+            .post('/register')
+            .send({ username: 'useroneget', password: 'password1' });
+
+        expect(userOneRegisterResponse.status).toBe(201);
+
+        const userTwoRegisterResponse = await request(app)
+            .post('/register')
+            .send({ username: 'usertwoget', password: 'password2' });
+
+        expect(userTwoRegisterResponse.status).toBe(201);
+
+        const userOneLoginResponse = await request(app)
+            .post('/login')
+            .send({ username: 'useroneget', password: 'password1' });
+
+        const userOneToken = userOneLoginResponse.body.accessToken;
+
+        const createItemResponse = await request(app)
+            .post('/items')
+            .set('Authorization', `Bearer ${userOneToken}`)
+            .send({ name: 'Test Item' });
+
+        const itemId = createItemResponse.body.id;
+
+        const userTwoLoginResponse = await request(app)
+            .post('/login')
+            .send({ username: 'usertwoget', password: 'password2' });
+
+        const userTwoToken = userTwoLoginResponse.body.accessToken;
+
+        const response = await request(app)
+            .get(`/items/${itemId}`)
+            .set('Authorization', `Bearer ${userTwoToken}`);
+
+        expect(response.status).toBe(403);
+        expect(response.body).toEqual({
+            error: 'You are not authorized to view this item'
+        });
+    });
     it('should return 400 if name is missing in POST /items', async () => {
         const response = await request(app)
             .post('/items')
